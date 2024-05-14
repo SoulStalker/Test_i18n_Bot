@@ -1,5 +1,5 @@
 from aiogram import F, Router, html
-from aiogram.filters import  CommandStart
+from aiogram.filters import CommandStart, Command
 from aiogram.types import (
     CallbackQuery,
     InlineKeyboardButton,
@@ -28,3 +28,13 @@ async def start(message: Message):
 @user_router.callback_query(F.data == 'button_pressed')
 async def button_pressed(call: CallbackQuery):
     await call.answer(text=_('Вы нажали на кнопку'))
+
+
+@user_router.message(Command('help'))
+async def process_help(message: Message):
+    await message.answer(
+        text=_('Это бот для демонстрации процесса интернационализации\n\n'
+               'Доступные команды:\n\n'
+               '/start - перезапуск бота'
+               '/help - справка по работе бота')
+    )

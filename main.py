@@ -33,9 +33,9 @@ async def main() -> None:
     dp.include_router(user_router)
     dp.include_router(other_router)
 
-    i18n = I18n(path="locales", default_locale="tr", domain="i18n_example_bot")
+    i18n = I18n(path="locales", default_locale="eu", domain="i18n_example_bot")
     # Здесь будем регистрировать миддлвари
-    dp.update.middleware(ConstI18nMiddleware(locale='tr', i18n=i18n))
+    dp.update.middleware(ConstI18nMiddleware(locale='en', i18n=i18n))
 
     # Запускаем polling
     await dp.start_polling(bot)
