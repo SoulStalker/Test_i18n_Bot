@@ -2,11 +2,14 @@ import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
-from aiogram.utils.i18n import ConstI18nMiddleware, I18n
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 from config_data.config import Config, load_config
+from fluentogram import TranslatorHub
 from handlers.other import other_router
 from handlers.user import user_router
-
+from middlewares.i18n import TranslatorRunnerMiddleware
+from utils.i18n import create_translator_hub
 
 # Настраиваем базовую конфигурацию логирования
 logging.basicConfig(
@@ -26,19 +29,24 @@ async def main() -> None:
     config: Config = load_config()
 
     # Инициализируем бот и диспетчер
-    bot = Bot(token=config.tg_bot.token)
+    bot = Bot(
+        token=config.tg_bot.token,
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+    )
     dp = Dispatcher()
+
+    # Создаем объект типа TranslatorHub
+    translator_hub: TranslatorHub = create_translator_hub()
 
     # Регистриуем роутеры в диспетчере
     dp.include_router(user_router)
     dp.include_router(other_router)
 
-    i18n = I18n(path="locales", default_locale="eu", domain="i18n_example_bot")
-    # Здесь будем регистрировать миддлвари
-    dp.update.middleware(ConstI18nMiddleware(locale='en', i18n=i18n))
+    # Регистрируем миддлварь для i18n
+    dp.update.middleware(TranslatorRunnerMiddleware())
 
     # Запускаем polling
-    await dp.start_polling(bot)
+    await dp.start_polling(bot, _translator_hub=translator_hub)
 
 
 asyncio.run(main())
